@@ -51,6 +51,11 @@ public class BaseEvent<M extends BaseModel> {
         this.message = message;
     }
 
+    public BaseEvent(M model) {
+        this.withError = false;
+        this.model = model;
+    }
+
     public List<M> getModelList() {
         return modelList;
     }

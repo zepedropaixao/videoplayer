@@ -15,10 +15,6 @@ import me.paixao.videoplayer.db.migrations.VPDatabase;
         insertConflict = ConflictAction.REPLACE,
         updateConflict = ConflictAction.REPLACE)
 public class Video extends BaseModel {
-
-    @Column(name = "name")
-    private String name;
-
     @Column(name = "uri")
     private String uri;
 
@@ -30,14 +26,6 @@ public class Video extends BaseModel {
             saveForeignKeyModel = false)
     @Column
     private Playlist playlist;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getUri() {
         return uri;

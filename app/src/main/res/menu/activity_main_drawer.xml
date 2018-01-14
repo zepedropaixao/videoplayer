@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:title="Home" />
+        <item
+            android:id="@+id/nav_brain"
+            android:title="Brain" />
+        <item
+            android:id="@+id/nav_ear"
+            android:title="Ear" />
+        <item
+            android:id="@+id/nav_heart"
+            android:title="Heart" />
+
+        <item
+            android:id="@+id/nav_hand"
+            android:title="Hand" />
+
+        <item
+            android:id="@+id/nav_foot"
+            android:title="Foot" />
+
+    </group>
+
+    <item android:title="Contact Me">
+        <menu>
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@android:drawable/ic_dialog_email"
+                android:title="Email" />
+
+            <item
+                android:id="@+id/nav_call"
+                android:icon="@android:drawable/ic_menu_call"
+                android:title="Call Me" />
+        </menu>
+    </item>
+
+</menu>

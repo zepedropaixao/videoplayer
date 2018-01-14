@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -66,10 +67,22 @@ public class MainActivity extends BaseActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(this);
 
         updatePlaylistList();
+
+        Button createNewPlaylist = findViewById(R.id.create_new_playlist);
+        createNewPlaylist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createNewPlaylist();
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+            }
+        });
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(
@@ -88,6 +101,12 @@ public class MainActivity extends BaseActivity
                     }
                 });
         super.onCreate(savedInstanceState);
+    }
+
+    public void createNewPlaylist() {
+        toast(R.string.please_select_the_videos_you_wish);
+        imageAdapter.setSelectMode(true);
+        app.bus.post(new StartCreatePlaylistEvent(false));
     }
 
     public void updatePlaylistList() {

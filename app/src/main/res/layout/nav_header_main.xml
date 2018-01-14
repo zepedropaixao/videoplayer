@@ -26,9 +26,10 @@
         android:text="@string/your_saved_playlists"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-    <TextView
+    <Button
+        android:id="@+id/create_new_playlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/main_activity_title" />
+        android:text="@string/create_new_playlist" />
 
 </LinearLayout>

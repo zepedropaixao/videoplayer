@@ -2,6 +2,8 @@
     <string name="app_name">VideoPlayer</string>
     <string name="drawer_open">VideoPlayer</string>
     <string name="drawer_close">VideoPlayer</string>
+    <string name="create_new_playlist">Create new playlist</string>
+    <string name="please_select_the_videos_you_wish">Please select the videos you wish to add to your playlist</string>
     <string name="main_activity_title">Pedro\'s Video Player</string>
     <string name="your_saved_playlists">Your saved playlists</string>
     <string name="please_select_videos">Please select videos</string>

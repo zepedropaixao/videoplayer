@@ -159,7 +159,7 @@ public class ImageAdapter extends BaseAdapter {
         mCheckBox.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                App.getInstance().toast("Select Mode Activated!");
+                App.getInstance().toast(R.string.please_select_the_videos_you_wish);
                 if (!selectMode)
                     selectMode = true;
                 mCheckBox.performClick();

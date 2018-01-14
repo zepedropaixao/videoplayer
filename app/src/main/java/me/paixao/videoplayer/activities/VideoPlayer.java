@@ -62,7 +62,7 @@ public class VideoPlayer extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_player_2);
+        setContentView(R.layout.activity_player);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

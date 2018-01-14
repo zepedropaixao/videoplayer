@@ -15,7 +15,6 @@
     <string name="success_edit">edited successfully</string>
     <string name="success_save">saved successfully</string>
     <string name="please_write_playlist_name">Please write a name for your playlist</string>
-    <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="main_activity_title">Pedro\'s Video Player</string>

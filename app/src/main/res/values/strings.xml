@@ -5,7 +5,19 @@
     <string name="create_new_playlist">Create new playlist</string>
     <string name="please_select_the_videos_you_wish">Please select the videos you wish to add to your playlist</string>
     <string name="please_select_or_deselect">Please select or de-select videos to change playlist</string>
-
+    <string name="app_requires_permissions_to_work">VideoPlayer requires several permissions to function, without it, it will not work properly.</string>
+    <string name="app_requires_permissions_to_work_second_try">Without the required permissions, VideoPlayer will not work, please give the required permissions at the settings of the app.</string>
+    <string name="go_to_app_settings">Go To App Settings</string>
+    <string name="try_again">Try again</string>
+    <string name="select_at_least_one_video">Please select at least one video for your playlist</string>
+    <string name="back">Back</string>
+    <string name="playlist">Playlist</string>
+    <string name="success_edit">edited successfully</string>
+    <string name="success_save">saved successfully</string>
+    <string name="please_write_playlist_name">Please write a name for your playlist</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
     <string name="main_activity_title">Pedro\'s Video Player</string>
     <string name="your_saved_playlists">Your saved playlists</string>
     <string name="please_select_videos">Please select videos</string>

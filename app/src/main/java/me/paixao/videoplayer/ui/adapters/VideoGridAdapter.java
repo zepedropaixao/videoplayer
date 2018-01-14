@@ -24,52 +24,27 @@ import me.paixao.videoplayer.ui.helpers.GlideApp;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
-public class ImageAdapter extends BaseAdapter {
+public class VideoGridAdapter extends BaseAdapter {
 
-    boolean selectMode = false;
-    boolean deleteMode = false;
-    ArrayList<String> mList;
-    ArrayList<String> mSelectedList;
-    LayoutInflater mInflater;
-    Context mContext;
+    private boolean selectMode = false;
+    private ArrayList<String> mList;
+    private ArrayList<String> mSelectedList;
+    private LayoutInflater mInflater;
+    private Context mContext;
 
-    CompoundButton.OnCheckedChangeListener mCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+    public VideoGridAdapter(Context context, ArrayList<String> imageList) {
+        this(context, imageList, new ArrayList<String>());
+    }
 
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            if (buttonView.isShown())
-                if (selectMode) {
-                    if (isChecked) {
-                        if (!mSelectedList.contains(mList.get((Integer) buttonView.getTag()))) {
-                            mSelectedList.add(mList.get((Integer) buttonView.getTag()));
-                        }
-                    } else {
-                        mSelectedList.remove(mList.get((Integer) buttonView.getTag()));
-                    }
-                    Resources res = App.getInstance().getResources();
-                    String title;
-                    int sel_size = mSelectedList.size();
-                    if (sel_size == 0) {
-                        title = res.getString(R.string.please_select_videos);
-                    } else {
-                        title = res.getQuantityString(R.plurals.videos_selected, sel_size, sel_size);
-                    }
-                    App.getInstance().bus.post(new SetNewTitleEvent(title));
-                } else {
-                    buttonView.toggle();
-                }
-        }
-    };
-
-    public ImageAdapter(Context context, ArrayList<String> imageList, ArrayList<String> selectedImageList) {
+    public VideoGridAdapter(Context context, ArrayList<String> imageList, ArrayList<String> selectedImageList) {
         mContext = context;
         mInflater = LayoutInflater.from(mContext);
         if (selectedImageList != null) {
             mSelectedList = selectedImageList;
         } else {
-            mSelectedList = new ArrayList<String>();
+            mSelectedList = new ArrayList<>();
         }
-        mList = new ArrayList<String>();
+        mList = new ArrayList<>();
         this.mList = imageList;
     }
 
@@ -143,30 +118,27 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, final ViewGroup parent) {
-
         final int mPosition = position;
 
         if (convertView == null) {
-            if (deleteMode) {
-                convertView = mInflater.inflate(R.layout.row_multiphoto_item_remove, null);
-            } else {
-                convertView = mInflater.inflate(R.layout.row_multiphoto_item, null);
-            }
+            convertView = mInflater.inflate(R.layout.row_multiphoto_item, null);
         }
 
-        final CheckBox mCheckBox = (CheckBox) convertView.findViewById(R.id.checkBox1);
-        final ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView1);
+        final CheckBox mCheckBox = convertView.findViewById(R.id.checkBox1);
+        final ImageView imageView = convertView.findViewById(R.id.imageView1);
 
         final String file_location = mList.get(position);
         String url;
-        if (file_location.startsWith("//web")) {
-            url = file_location;
-        } else if (file_location.startsWith("file://") || file_location.startsWith("http://") || file_location.startsWith("https://")) {
+        if (file_location.startsWith("//web")
+                || file_location.startsWith("file://")
+                || file_location.startsWith("http://")
+                || file_location.startsWith("https://")) {
             url = file_location;
         } else {
             url = "file://" + file_location;
         }
 
+        // Long click listener to start creating a new playlist
         mCheckBox.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -174,12 +146,12 @@ public class ImageAdapter extends BaseAdapter {
                 if (!selectMode)
                     selectMode = true;
                 mCheckBox.performClick();
-                App.getInstance().bus.post(new StartCreatePlaylistEvent(false));
-
+                App.getInstance().bus.post(new StartCreatePlaylistEvent());
                 return true;
             }
         });
 
+        // Generate and load thumbnails of videos with Glide
         GlideApp.with(mContext)
                 .load(url)
                 .centerCrop()
@@ -189,15 +161,45 @@ public class ImageAdapter extends BaseAdapter {
 
         mCheckBox.setTag(position);
         mCheckBox.setChecked((mSelectedList.contains(file_location) || mSelectedList.contains(url)));
-        mCheckBox.setOnCheckedChangeListener(mCheckedChangeListener);
 
+        // OnChecked listener, selects and deselects video only when in selectMode
+        mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (buttonView.isShown())
+                    if (selectMode) {
+                        if (isChecked) {
+                            if (!mSelectedList.contains(mList.get((Integer) buttonView.getTag()))) {
+                                mSelectedList.add(mList.get((Integer) buttonView.getTag()));
+                            }
+                        } else {
+                            mSelectedList.remove(mList.get((Integer) buttonView.getTag()));
+                        }
+
+                        // Define new title for MainActivity
+                        Resources res = App.getInstance().getResources();
+                        String title;
+                        int sel_size = mSelectedList.size();
+                        if (sel_size == 0) {
+                            title = res.getString(R.string.please_select_videos);
+                        } else {
+                            title = res.getQuantityString(R.plurals.videos_selected, sel_size, sel_size);
+                        }
+
+                        // Fire UI Event to change title of MainActivity
+                        App.getInstance().bus.post(new SetNewTitleEvent(title));
+                    } else {
+                        buttonView.toggle();
+                    }
+            }
+        });
+
+        // On click listener to open video directly when not in selectMode
         mCheckBox.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (deleteMode) {
-                    removeItem(mPosition);
-                } else if (!deleteMode && !selectMode) {
+                if (!selectMode) {
                     String uri = (String) getItem(mPosition);
                     Intent intent = new Intent(mContext, VideoPlayer.class);
                     intent.putExtra("uri", uri);
@@ -205,7 +207,6 @@ public class ImageAdapter extends BaseAdapter {
                 }
             }
         });
-
         return convertView;
     }
 }

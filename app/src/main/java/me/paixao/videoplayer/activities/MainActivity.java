@@ -38,31 +38,33 @@ import me.paixao.videoplayer.events.EditPlaylistEvent;
 import me.paixao.videoplayer.events.OpenPlaylistEvent;
 import me.paixao.videoplayer.events.SetNewTitleEvent;
 import me.paixao.videoplayer.events.StartCreatePlaylistEvent;
-import me.paixao.videoplayer.ui.adapters.ImageAdapter;
 import me.paixao.videoplayer.ui.adapters.PlaylistAdapter;
+import me.paixao.videoplayer.ui.adapters.VideoGridAdapter;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    ImageAdapter imageAdapter;
+    VideoGridAdapter videoGridAdapter;
+
+    // When editing a playlist this id is defined
+    String editUUID = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         setTitle(R.string.main_activity_title);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        final NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
+        final NavigationView navigationView = findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(this);
 
         updatePlaylistList();
@@ -72,7 +74,7 @@ public class MainActivity extends BaseActivity
             @Override
             public void onClick(View view) {
                 createNewPlaylist();
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
                     drawer.closeDrawer(GravityCompat.START);
                 }
@@ -89,15 +91,15 @@ public class MainActivity extends BaseActivity
                                 cancelCreatePlaylist();
                                 break;
                             case R.id.action_save:
-                                if (imageAdapter.getCheckedItems().isEmpty()) {
-                                    toast("Please select at least one video for your playlist");
+                                if (videoGridAdapter.getCheckedItems().isEmpty()) {
+                                    toast(R.string.select_at_least_one_video);
                                 } else {
                                     if (editUUID != null) {
                                         Playlist pl = new Select().from(Playlist.class).where(Playlist_Table.uuid.eq(editUUID)).querySingle();
                                         String name = pl.getName();
                                         pl.delete();
                                         saveNewPlayList(name);
-                                        toast("Playlist " + name + " edited successfully!");
+                                        toast(getString(R.string.playlist) + " " + name + " " + getString(R.string.success_edit));
                                     } else {
                                         askForPlaylistName();
                                     }
@@ -112,19 +114,16 @@ public class MainActivity extends BaseActivity
 
     public void createNewPlaylist() {
         toast(R.string.please_select_the_videos_you_wish);
-        imageAdapter.setSelectMode(true);
-        app.bus.post(new StartCreatePlaylistEvent(false));
+        videoGridAdapter.setSelectMode(true);
+        app.bus.post(new StartCreatePlaylistEvent());
     }
-
-    String editUUID = null;
 
     public void editPlaylist(ArrayList<String> selected) {
         toast(R.string.please_select_or_deselect);
         closeDrawer();
-
-        imageAdapter.setSelectMode(true);
-        imageAdapter.reset(selected);
-        app.bus.post(new StartCreatePlaylistEvent(false));
+        videoGridAdapter.setSelectMode(true);
+        videoGridAdapter.reset(selected);
+        app.bus.post(new StartCreatePlaylistEvent());
     }
 
     public void updatePlaylistList() {
@@ -142,13 +141,12 @@ public class MainActivity extends BaseActivity
                 });
             }
         }).execute();
-
     }
 
     public void cancelCreatePlaylist() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        imageAdapter.setSelectMode(false);
-        imageAdapter.reset();
+        videoGridAdapter.setSelectMode(false);
+        videoGridAdapter.reset();
         slideDown(bottomNavigationView);
         editUUID = null;
         setTitle(R.string.main_activity_title);
@@ -156,29 +154,26 @@ public class MainActivity extends BaseActivity
 
     public void askForPlaylistName() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Please write a name for your playlist");
-        // Why are you setting message here when you are inflating custom view?
-        // You need to add another TextView in xml if you want to set message here
-        // Otherwise the message will not be shown
-        // builder.setMessage("Do you want to\n"+""+"exit from app");
+        builder.setTitle(R.string.please_write_playlist_name);
+
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_layout, null);
-        final AppCompatEditText input = (AppCompatEditText) view.findViewById(R.id.editText);
+        final AppCompatEditText input = view.findViewById(R.id.editText);
         builder.setView(view);
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
         });
 
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 String name = input.getText().toString();
-                if (name == null || name.equals("")) {
-                    toast("Please write a name for your playlist");
+                if (name.trim().equals("")) {
+                    toast(R.string.please_write_playlist_name);
                     askForPlaylistName();
                 } else {
                     saveNewPlayList(name);
-                    toast("Playlist " + name + " saved successfully!");
+                    toast(getString(R.string.playlist) + " " + name + " " + getString(R.string.success_save));
                 }
             }
         });
@@ -191,8 +186,12 @@ public class MainActivity extends BaseActivity
         Playlist pl = new Playlist();
         pl.setName(name);
         pl.save();
-        List<String> selectedVideos = imageAdapter.getCheckedItems();
-        List<Video> myVideos = new ArrayList();
+        List<String> selectedVideos = videoGridAdapter.getCheckedItems();
+        List<Video> myVideos = new ArrayList<>();
+
+        // TODO Here I define the order for which I want the videos to play.
+        // Could try diferent ordering for the playlists
+        // For now it just accepts the gridAdapter selected array order
         int order = 0;
         for (String vid : selectedVideos) {
             Video video = new Video();
@@ -209,7 +208,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -218,7 +217,7 @@ public class MainActivity extends BaseActivity
     }
 
     public void closeDrawer() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
@@ -226,20 +225,15 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void refresh() {
-        if (imageAdapter == null) {
-            imageAdapter = new ImageAdapter(MainActivity.this, getAllMedia(), new ArrayList<String>());
-
-            final GridView grid = findViewById(R.id.gridview);
-            grid.setAdapter(imageAdapter);
+        if (videoGridAdapter == null) {
+            videoGridAdapter = new VideoGridAdapter(MainActivity.this, getAllMedia());
+            GridView grid = findViewById(R.id.gridview);
+            grid.setAdapter(videoGridAdapter);
         }
     }
 
-    /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-        //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -255,19 +249,17 @@ public class MainActivity extends BaseActivity
         app.bus.unregister(this);
     }
 
+    // UI events
+
     @Subscribe
     public void onStartCreatePlaylistEvent(StartCreatePlaylistEvent event) {
-        // doSomething with the event...
-        if (!event.isWithError()) {
-            imageAdapter.setSelectMode(true);
-            BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-            slideUp(bottomNavigationView);
-        }
+        videoGridAdapter.setSelectMode(true);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        slideUp(bottomNavigationView);
     }
 
     @Subscribe
     public void onSetNewTitleEvent(final SetNewTitleEvent event) {
-        // doSomething with the event...
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -278,75 +270,55 @@ public class MainActivity extends BaseActivity
 
     @Subscribe
     public void onOpenPlaylistEvent(final OpenPlaylistEvent event) {
-        // doSomething with the event...
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Playlist pl = (Playlist) event.getModel();
-                List<Video> vids = pl.getVideos();
-                String uri = vids.get(0).getUri();
-                Intent intent = new Intent(_this, VideoPlayer.class);
-                intent.putExtra("uri", uri);
-                intent.putExtra("playlist", pl.getUuid());
-                startActivity(intent);
-            }
-        });
-
+        Playlist pl = (Playlist) event.getModel();
+        List<Video> vids = pl.getVideos();
+        String uri = vids.get(0).getUri();
+        Intent intent = new Intent(_this, VideoPlayer.class);
+        intent.putExtra("uri", uri);
+        intent.putExtra("playlist", pl.getUuid());
+        startActivity(intent);
     }
 
     @Subscribe
     public void onEditPlaylistEvent(final EditPlaylistEvent event) {
-        // doSomething with the event...
-        toast("Edit PL: " + ((Playlist) event.getModel()).getName());
         Playlist pl = (Playlist) event.getModel();
-        String name = pl.getName();
-
         editUUID = pl.getUuid();
-
         List<Video> vids = pl.getVideos();
         ArrayList<String> selected = new ArrayList<>();
         for (Video vid : vids)
             selected.add(vid.getUri());
-
         editPlaylist(selected);
-
-        /*pl.delete();
-        saveNewPlayList(name);
-        toast("Playlist " + name + " edited successfully!");*/
-
     }
 
     @Subscribe
     public void onDeletePlaylistEvent(final DeletePlaylistEvent event) {
-        // doSomething with the event...
         Playlist pl = (Playlist) event.getModel();
         pl.delete();
         updatePlaylistList();
         closeDrawer();
         toast(R.string.success_delete_playlist);
-
     }
 
-    // slide the view from below itself to the current position
+    // slide the view from below to the current position
     public void slideUp(View view) {
         view.setVisibility(View.VISIBLE);
         TranslateAnimation animate = new TranslateAnimation(
-                0,                 // fromXDelta
-                0,                 // toXDelta
-                view.getHeight(),  // fromYDelta
-                0);                // toYDelta
+                0,
+                0,
+                view.getHeight(),
+                0);
         animate.setDuration(500);
         animate.setFillAfter(true);
         view.startAnimation(animate);
     }
 
-    // slide the view from its current position to below itself
+    // slide the view from its current position to below
     public void slideDown(View view) {
         TranslateAnimation animate = new TranslateAnimation(
-                0,                 // fromXDelta
-                0,                 // toXDelta
-                0,                 // fromYDelta
-                view.getHeight()); // toYDelta
+                0,
+                0,
+                0,
+                view.getHeight());
         animate.setDuration(500);
         animate.setFillAfter(true);
         view.startAnimation(animate);

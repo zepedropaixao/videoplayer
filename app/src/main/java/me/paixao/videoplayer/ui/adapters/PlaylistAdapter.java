@@ -19,12 +19,11 @@ import me.paixao.videoplayer.events.OpenPlaylistEvent;
 
 public class PlaylistAdapter extends BaseAdapter {
 
-    Context context;
-    List<Playlist> data;
+    private Context context;
+    private List<Playlist> data;
     private static LayoutInflater inflater = null;
 
     public PlaylistAdapter(Context context, List<Playlist> data) {
-        // TODO Auto-generated constructor stub
         this.context = context;
         this.data = data;
         inflater = (LayoutInflater) context
@@ -33,30 +32,28 @@ public class PlaylistAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        // TODO Auto-generated method stub
         return data.size();
     }
 
     @Override
     public Object getItem(int position) {
-        // TODO Auto-generated method stub
         return data.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        // TODO Auto-generated method stub
         return position;
     }
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        // TODO Auto-generated method stub
         View vi = convertView;
         if (vi == null)
             vi = inflater.inflate(R.layout.playlist_row, null);
-        TextView text = (TextView) vi.findViewById(R.id.text);
+        TextView text = vi.findViewById(R.id.text);
         text.setText(data.get(position).getName());
+
+        // UI Events when clicking Row, Edit or Delete buttons
         vi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -71,6 +68,7 @@ public class PlaylistAdapter extends BaseAdapter {
                 App.getInstance().bus.post(new EditPlaylistEvent(data.get(position)));
             }
         });
+
         ImageButton del = vi.findViewById(R.id.delete_playlist);
         del.setOnClickListener(new View.OnClickListener() {
             @Override

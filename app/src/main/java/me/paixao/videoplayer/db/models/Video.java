@@ -1,4 +1,3 @@
-
 package me.paixao.videoplayer.db.models;
 
 import com.raizlabs.android.dbflow.annotation.Column;

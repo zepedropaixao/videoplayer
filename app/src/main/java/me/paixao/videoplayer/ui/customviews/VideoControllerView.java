@@ -21,7 +21,6 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -41,7 +40,11 @@ import java.util.Locale;
 
 import me.paixao.videoplayer.R;
 
+/*
+ * Custom View to make custom controls for MediaPlayer
+ */
 public class VideoControllerView extends FrameLayout {
+
     private MediaPlayerControl mPlayer;
     private Context mContext;
     private ViewGroup mAnchor;
@@ -91,6 +94,7 @@ public class VideoControllerView extends FrameLayout {
     public void onFinishInflate() {
         if (mRoot != null)
             initControllerView(mRoot);
+        super.onFinishInflate();
     }
 
     public void setMediaPlayer(MediaPlayerControl player) {
@@ -101,7 +105,6 @@ public class VideoControllerView extends FrameLayout {
 
     /**
      * Set the view that acts as the anchor for the control view.
-     * This can for example be a VideoView, or your Activity's main view.
      *
      * @param view The view to which to anchor the controller when it is visible.
      */
@@ -120,33 +123,31 @@ public class VideoControllerView extends FrameLayout {
 
     /**
      * Create the view that holds the widgets that control playback.
-     * Derived classes can override this to create their own.
      *
      * @return The controller view.
-     * @hide This doesn't work as advertised
      */
     protected View makeControllerView() {
         LayoutInflater inflate = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRoot = inflate.inflate(R.layout.media_controller, null);
-
         initControllerView(mRoot);
-
         return mRoot;
     }
 
     private void initControllerView(View v) {
-        mPauseButton = (ImageButton) v.findViewById(R.id.pause);
+        mPauseButton = v.findViewById(R.id.pause);
         if (mPauseButton != null) {
             mPauseButton.requestFocus();
             mPauseButton.setOnClickListener(mPauseListener);
         }
 
-        mFullscreenButton = (ImageButton) v.findViewById(R.id.fullscreen);
+        // Toggle fullscreen button
+        mFullscreenButton = v.findViewById(R.id.fullscreen);
         if (mFullscreenButton != null) {
             mFullscreenButton.requestFocus();
             mFullscreenButton.setOnClickListener(mFullscreenListener);
         }
 
+        // Volume control with vertical seekbar
         mVolumeButton = v.findViewById(R.id.volume);
         if (mVolumeButton != null) {
             mVolumeButton.requestFocus();
@@ -154,7 +155,6 @@ public class VideoControllerView extends FrameLayout {
         }
         volumeBar = v.findViewById(R.id.volumeBar);
         final AudioManager audioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-
         volumeBar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         volumeBar.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
         volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -165,16 +165,14 @@ public class VideoControllerView extends FrameLayout {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
 
-        mFfwdButton = (ImageButton) v.findViewById(R.id.ffwd);
+        mFfwdButton = v.findViewById(R.id.ffwd);
         if (mFfwdButton != null) {
             mFfwdButton.setOnClickListener(mFfwdListener);
             if (!mFromXml) {
@@ -182,7 +180,7 @@ public class VideoControllerView extends FrameLayout {
             }
         }
 
-        mRewButton = (ImageButton) v.findViewById(R.id.rew);
+        mRewButton = v.findViewById(R.id.rew);
         if (mRewButton != null) {
             mRewButton.setOnClickListener(mRewListener);
             if (!mFromXml) {
@@ -191,16 +189,16 @@ public class VideoControllerView extends FrameLayout {
         }
 
         // By default these are hidden. They will be enabled when setPrevNextListeners() is called
-        mNextButton = (ImageButton) v.findViewById(R.id.next);
+        mNextButton = v.findViewById(R.id.next);
         if (mNextButton != null && !mFromXml && !mListenersSet) {
             mNextButton.setVisibility(View.GONE);
         }
-        mPrevButton = (ImageButton) v.findViewById(R.id.prev);
+        mPrevButton = v.findViewById(R.id.prev);
         if (mPrevButton != null && !mFromXml && !mListenersSet) {
             mPrevButton.setVisibility(View.GONE);
         }
 
-        mProgress = (ProgressBar) v.findViewById(R.id.mediacontroller_progress);
+        mProgress = v.findViewById(R.id.mediacontroller_progress);
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
                 SeekBar seeker = (SeekBar) mProgress;
@@ -209,8 +207,8 @@ public class VideoControllerView extends FrameLayout {
             mProgress.setMax(1000);
         }
 
-        mEndTime = (TextView) v.findViewById(R.id.time);
-        mCurrentTime = (TextView) v.findViewById(R.id.time_current);
+        mEndTime = v.findViewById(R.id.time);
+        mCurrentTime = v.findViewById(R.id.time_current);
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
 
@@ -256,8 +254,7 @@ public class VideoControllerView extends FrameLayout {
      * Show the controller on screen. It will go away
      * automatically after 'timeout' milliseconds of inactivity.
      *
-     * @param timeout The timeout in milliseconds. Use 0 to show
-     *                the controller until hide() is called.
+     * @param timeout The timeout in milliseconds.
      */
     public void show(int timeout) {
         if (!mShowing && mAnchor != null) {
@@ -307,7 +304,6 @@ public class VideoControllerView extends FrameLayout {
             mAnchor.removeView(this);
             mHandler.removeMessages(SHOW_PROGRESS);
         } catch (IllegalArgumentException ex) {
-            Log.w("MediaController", "already removed");
         }
         mShowing = false;
     }
@@ -402,7 +398,6 @@ public class VideoControllerView extends FrameLayout {
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
                 || keyCode == KeyEvent.KEYCODE_VOLUME_UP
                 || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
-            // don't show the controls for volume adjustment
             return super.dispatchKeyEvent(event);
         } else if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU) {
             if (uniqueDown) {
@@ -663,7 +658,7 @@ public class VideoControllerView extends FrameLayout {
         private final WeakReference<VideoControllerView> mView;
 
         MessageHandler(VideoControllerView view) {
-            mView = new WeakReference<VideoControllerView>(view);
+            mView = new WeakReference<>(view);
         }
 
         @Override

@@ -3,6 +3,9 @@ package me.paixao.videoplayer.ui.customviews;
 import android.content.Context;
 import android.util.AttributeSet;
 
+/*
+ * Custom View to make square checkboxes
+ */
 public class SquareCustomCheckBox extends android.support.v7.widget.AppCompatCheckBox {
     public SquareCustomCheckBox(Context context) {
         super(context);

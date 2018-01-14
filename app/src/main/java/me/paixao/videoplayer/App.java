@@ -14,23 +14,14 @@ import com.raizlabs.android.dbflow.config.FlowManager;
 
 import org.greenrobot.eventbus.EventBus;
 
-
 public class App extends Application {
     private static App instance;
-
-    // Logging level
     public static boolean activeLogs = true;
-
     SharedPreferences sharedPreferences;
-
     public Handler handler;
-
     protected final App _this = this;
-
     String version, versionName = "";
-
     public static Toast mToast;
-
     public EventBus bus;
 
     public static App getInstance() {
@@ -45,17 +36,20 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        sharedPreferences = getSharedPreferences("infraspeak.activity",
+        // Initialise SharedPreferences - was going to use it
+        // to save playlist preferences :)
+        sharedPreferences = getSharedPreferences("me.paixao.videoplayer",
                 Context.MODE_PRIVATE);
 
         instance = this;
-
         handler = new Handler(getContext().getMainLooper());
 
+        // Initialise database
         FlowManager.init(new FlowConfig.Builder(this)
                 .openDatabasesOnInit(true)
                 .build());
 
+        // Initialise EventBus
         bus = EventBus.getDefault();
 
         try {
@@ -167,6 +161,4 @@ public class App extends Application {
     public void setValue(String value) {
         putPref("value", value);
     }
-
-
 }

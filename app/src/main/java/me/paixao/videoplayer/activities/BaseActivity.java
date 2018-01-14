@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import me.paixao.videoplayer.App;
+import me.paixao.videoplayer.R;
 
 public class BaseActivity extends AppCompatActivity {
 
     App app = App.getInstance();
     protected final int REQUEST_PERMISSION = 1986;
-
     BaseActivity _this = this;
 
     @Override
@@ -48,6 +48,8 @@ public class BaseActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    // Function called when requires permissions are met.
+    // All code that requires permissions should be here
     public void refresh() {
         // Stub
     }
@@ -70,15 +72,15 @@ public class BaseActivity extends AppCompatActivity {
 
     public void requestPermission(final String permission) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("VideoPlayer requires several permissions to function, without it, it will not work properly.")
+        builder.setMessage(R.string.app_requires_permissions_to_work)
                 .setCancelable(false)
-                .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.try_again, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ActivityCompat.requestPermissions(
                                 _this, new String[]{permission}, REQUEST_PERMISSION);
                     }
                 })
-                .setNegativeButton("Back", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.back, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         finish();
                     }
@@ -87,11 +89,14 @@ public class BaseActivity extends AppCompatActivity {
         alert.show();
     }
 
+    // Request permissions when they were already denied.
+    // At this stage, per best code standards,
+    // ask user to go to App Settings and give the required permissions manually.
     public void requestPermissionGoToAppSettings() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Whithout the required permissions, VideoPlayer will not work, please give the required permissions at the settings of the app. ")
+        builder.setMessage(R.string.app_requires_permissions_to_work_second_try)
                 .setCancelable(false)
-                .setPositiveButton("Go To App Settings", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.go_to_app_settings, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Intent intent = new Intent();
                         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -101,7 +106,7 @@ public class BaseActivity extends AppCompatActivity {
                         _this.finish();
                     }
                 })
-                .setNegativeButton("Back", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.back, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         _this.finish();
                     }
@@ -128,8 +133,7 @@ public class BaseActivity extends AppCompatActivity {
         int permissionFileRead = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
 
         ArrayList<String> perms = new ArrayList<>();
-
-
+        
         if (permissionFileWrite != PackageManager.PERMISSION_GRANTED) {
             perms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }

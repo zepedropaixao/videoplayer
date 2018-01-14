@@ -31,31 +31,39 @@ import me.paixao.videoplayer.db.models.Video;
 import me.paixao.videoplayer.db.models.Video_Table;
 import me.paixao.videoplayer.ui.customviews.VideoControllerView;
 
-public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback, MediaPlayer.OnPreparedListener, VideoControllerView.MediaPlayerControl {
+public class VideoPlayer extends BaseActivity
+        implements SurfaceHolder.Callback, MediaPlayer.OnPreparedListener,
+        VideoControllerView.MediaPlayerControl {
+
+    // When a playlist is opened, this var is defined
     String playlist_uuid;
+
+    // URL to the current playing video
     String currentVideoSource;
+
     SurfaceView videoSurface;
     MediaPlayer player;
+
+    // Video proportions vars
+    Integer videoWidth, videoHeight = null;
+    float videoProportion;
+
+    // Custom view with the desired controls
     VideoControllerView controller;
 
+    // Array of URLs to run in sequence
     ArrayList<String> allMedia;
+
+    // Auxiliary index used to know in the list which video I'm currently playing
     int myCurrentVideoIndex = 0;
 
     public boolean mIsPlayerRelease = true;
     boolean fullScreen = false;
 
-    public String getFileName(String result) {
-        int cut = result.lastIndexOf('/');
-        if (cut != -1) {
-            result = result.substring(cut + 1);
-        }
-        return result;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_player_2);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
@@ -64,29 +72,27 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
             actionBar.setDisplayShowHomeEnabled(true);
         }
 
-        String videoPlace = null;
+        currentVideoSource = null;
         playlist_uuid = null;
         if (getIntent().hasExtra("uri"))
-            videoPlace = getIntent().getStringExtra("uri");
+            currentVideoSource = getIntent().getStringExtra("uri");
 
         if (getIntent().hasExtra("playlist"))
             playlist_uuid = getIntent().getStringExtra("playlist");
 
-
-        if (videoPlace == null)
+        if (currentVideoSource == null)
             finish();
 
-        currentVideoSource = videoPlace;
-
+        // Define title of the Activity
         Playlist pl = null;
         if (playlist_uuid != null)
             pl = new Select().from(Playlist.class)
                     .where(Playlist_Table.uuid.eq(playlist_uuid))
                     .querySingle();
         if (pl != null) {
-            setTitle("#" + pl.getName() + " - " + getFileName(videoPlace));
+            setTitle("#" + pl.getName() + " - " + getFileName(currentVideoSource));
         } else {
-            setTitle(getFileName(videoPlace));
+            setTitle(getFileName(currentVideoSource));
         }
 
         super.onCreate(savedInstanceState);
@@ -124,8 +130,15 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
         }
     }
 
+    public String getFileName(String result) {
+        int cut = result.lastIndexOf('/');
+        if (cut != -1) {
+            result = result.substring(cut + 1);
+        }
+        return result;
+    }
+
     public void goToPreviousVideo() {
-        // PREVIOUS
         if (myCurrentVideoIndex == 0) {
             myCurrentVideoIndex = allMedia.size() - 1;
         } else {
@@ -142,7 +155,6 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
     }
 
     public void goToNextVideo() {
-        // NEXT
         if (myCurrentVideoIndex == allMedia.size() - 1) {
             myCurrentVideoIndex = 0;
         } else {
@@ -199,7 +211,7 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
             }
         });
 
-        videoSurface = (SurfaceView) findViewById(R.id.videoSurface);
+        videoSurface = findViewById(R.id.videoSurface);
         SurfaceHolder videoHolder = videoSurface.getHolder();
         videoHolder.addCallback(this);
 
@@ -255,8 +267,6 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
             width = (int) (videoProportion * (float) screenHeight);
             height = screenHeight;
         }
-
-        // Get the SurfaceView layout parameters
         videoSurfaceParams.width = width;
         videoSurfaceParams.height = height;
 
@@ -277,8 +287,6 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
     }
 
     // End SurfaceHolder.Callback
-    Integer videoWidth, videoHeight = null;
-    float videoProportion;
 
     // Implement MediaPlayer.OnPreparedListener
     @Override

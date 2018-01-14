@@ -188,6 +188,18 @@ public abstract class BaseModel implements Model {
         return FlowManager.getModelAdapter(getClass());
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void load() {
+        getModelAdapter().load(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void load(DatabaseWrapper wrapper) {
+        getModelAdapter().load(this, wrapper);
+    }
+
     public static void l(String tag, String message) {
         App.getInstance().l(tag, message);
     }
@@ -206,17 +218,5 @@ public abstract class BaseModel implements Model {
 
     public String getClassName() {
         return this.getClass().getSimpleName();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void load() {
-        getModelAdapter().load(this);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void load(DatabaseWrapper wrapper) {
-        getModelAdapter().load(this, wrapper);
     }
 }

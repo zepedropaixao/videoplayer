@@ -3,6 +3,9 @@ package me.paixao.videoplayer.ui.customviews;
 import android.content.Context;
 import android.util.AttributeSet;
 
+/*
+ * Custom View to make square image views
+ */
 public class SquareImageView extends android.support.v7.widget.AppCompatImageView {
     public SquareImageView(Context context) {
         super(context);

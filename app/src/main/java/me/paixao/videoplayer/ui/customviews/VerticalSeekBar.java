@@ -5,6 +5,9 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+/*
+ * Custom View to make vertical SeekBars
+ */
 public class VerticalSeekBar extends android.support.v7.widget.AppCompatSeekBar {
 
     public VerticalSeekBar(Context context) {
@@ -32,7 +35,6 @@ public class VerticalSeekBar extends android.support.v7.widget.AppCompatSeekBar 
     protected void onDraw(Canvas c) {
         c.rotate(-90);
         c.translate(-getHeight(), 0);
-
         super.onDraw(c);
     }
 

@@ -1,23 +1,29 @@
-package me.paixao.videoplayer;
+package me.paixao.videoplayer.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+
+import me.paixao.videoplayer.App;
 
 public class BaseActivity extends AppCompatActivity {
 
-
+    App app = App.getInstance();
     protected final int REQUEST_PERMISSION = 1986;
 
     BaseActivity _this = this;
@@ -29,6 +35,18 @@ public class BaseActivity extends AppCompatActivity {
             requestPermissions();
         }
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null && !(this instanceof MainActivity)) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     @Override
@@ -37,7 +55,7 @@ public class BaseActivity extends AppCompatActivity {
         refresh();
     }
 
-    public void refresh(){
+    public void refresh() {
         // Stub
     }
 
@@ -130,5 +148,55 @@ public class BaseActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(
                     this, perms.toArray(new String[perms.size()]), REQUEST_PERMISSION);
         }
+    }
+
+    public String getClassName() {
+        return this.getClass().getSimpleName();
+    }
+
+    public void toast(String text) {
+        app.toast(text);
+    }
+
+    public void toast(int text_id) {
+        app.toast(text_id);
+    }
+
+    public void toast(int text_id, Object... formatArgs) {
+        app.toast(text_id, formatArgs);
+    }
+
+    public static void l(String tag, String message) {
+        App.getInstance().l(tag, message);
+    }
+
+    public static void le(String tag, String message) {
+        App.getInstance().le(tag, message);
+    }
+
+    public void l(String message) {
+        app.l(getClassName(), message);
+    }
+
+    public void le(String message) {
+        app.le(getClassName(), message);
+    }
+
+    public ArrayList<String> getAllMedia() {
+        HashSet<String> videoItemHashSet = new HashSet<String>();
+        String[] projection = {MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME};
+        Cursor cursor = getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+        try {
+            cursor.moveToFirst();
+            do {
+                videoItemHashSet.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA))));
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ArrayList<String> downloadedList = new ArrayList<>(videoItemHashSet);
+        return downloadedList;
     }
 }

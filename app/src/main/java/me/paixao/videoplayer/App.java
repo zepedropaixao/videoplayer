@@ -12,6 +12,8 @@ import android.widget.Toast;
 import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 
+import org.greenrobot.eventbus.EventBus;
+
 
 public class App extends Application {
     private static App instance;
@@ -28,6 +30,8 @@ public class App extends Application {
     String version, versionName = "";
 
     public static Toast mToast;
+
+    public EventBus bus;
 
     public static App getInstance() {
         return instance;
@@ -51,6 +55,8 @@ public class App extends Application {
         FlowManager.init(new FlowConfig.Builder(this)
                 .openDatabasesOnInit(true)
                 .build());
+
+        bus = EventBus.getDefault();
 
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);

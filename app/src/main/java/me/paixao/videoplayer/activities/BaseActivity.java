@@ -13,7 +13,6 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -34,13 +33,6 @@ public class BaseActivity extends AppCompatActivity {
         if (!checkPermissions()) {
             requestPermissions();
         }
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null && !(this instanceof MainActivity)) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
-
     }
 
     @Override

@@ -30,6 +30,7 @@ def support_version = "27.0.2"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "com.android.support:appcompat-v7:${support_version}"
+    compile "com.android.support:design:${support_version}"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     // DBFlow
     annotationProcessor "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
@@ -41,6 +42,8 @@ dependencies {
     // Glide
     compile 'com.github.bumptech.glide:glide:4.5.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.5.0'
+    // EventBus
+    compile 'org.greenrobot:eventbus:3.0.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

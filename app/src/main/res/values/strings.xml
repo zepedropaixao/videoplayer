@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">VideoPlayer</string>
+    <string name="drawer_open">VideoPlayer</string>
+    <string name="drawer_close">VideoPlayer</string>
+    <string name="main_activity_title">Pedro\'s Video Player</string>
+    <string name="please_select_videos">Please select videos</string>
+    <plurals name="videos_selected">
+        <item quantity="one">%d video selected</item>
+        <item quantity="other">%d videos selected</item>
+    </plurals>
 </resources>

@@ -2,7 +2,9 @@ package me.paixao.videoplayer.ui.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+import android.content.res.Resources;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +15,11 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 
+import me.paixao.videoplayer.App;
 import me.paixao.videoplayer.R;
 import me.paixao.videoplayer.activities.VideoPlayer;
+import me.paixao.videoplayer.events.SetNewTitleEvent;
+import me.paixao.videoplayer.events.StartCreatePlaylistEvent;
 import me.paixao.videoplayer.ui.helpers.GlideApp;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -27,7 +32,6 @@ public class ImageAdapter extends BaseAdapter {
     ArrayList<String> mSelectedList;
     LayoutInflater mInflater;
     Context mContext;
-
 
     CompoundButton.OnCheckedChangeListener mCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
 
@@ -42,6 +46,15 @@ public class ImageAdapter extends BaseAdapter {
                     } else {
                         mSelectedList.remove(mList.get((Integer) buttonView.getTag()));
                     }
+                    Resources res = App.getInstance().getResources();
+                    String title;
+                    int sel_size = mSelectedList.size();
+                    if (sel_size == 0) {
+                        title = res.getString(R.string.please_select_videos);
+                    } else {
+                        title = res.getQuantityString(R.plurals.videos_selected, sel_size, sel_size);
+                    }
+                    App.getInstance().bus.post(new SetNewTitleEvent(title));
                 } else {
                     buttonView.toggle();
                 }
@@ -87,6 +100,17 @@ public class ImageAdapter extends BaseAdapter {
         return mList;
     }
 
+    public void reset() {
+        Handler handler = new Handler(Looper.getMainLooper());
+        mSelectedList = new ArrayList<String>();
+        final Runnable r = new Runnable() {
+            public void run() {
+                notifyDataSetChanged();
+            }
+        };
+        handler.post(r);
+    }
+
     @Override
     public int getCount() {
         return mList.size();
@@ -102,8 +126,12 @@ public class ImageAdapter extends BaseAdapter {
         return position;
     }
 
+    public void setSelectMode(boolean selectMode) {
+        this.selectMode = selectMode;
+    }
+
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
 
         final int mPosition = position;
 
@@ -128,15 +156,18 @@ public class ImageAdapter extends BaseAdapter {
             url = "file://" + file_location;
         }
 
-        /*parent.setOnLongClickListener(new View.OnLongClickListener() {
+        mCheckBox.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                App.getInstance().toast("I LONG PRESSED");
+                App.getInstance().toast("Select Mode Activated!");
                 if (!selectMode)
                     selectMode = true;
+                mCheckBox.performClick();
+                App.getInstance().bus.post(new StartCreatePlaylistEvent(false));
+
                 return true;
             }
-        });*/
+        });
 
         GlideApp.with(mContext)
                 .load(url)
@@ -156,16 +187,10 @@ public class ImageAdapter extends BaseAdapter {
                 if (deleteMode) {
                     removeItem(mPosition);
                 } else if (!deleteMode && !selectMode) {
-
-                    Log.e("ERROR", "IM HERE");
-
-
                     String uri = (String) getItem(mPosition);
                     Intent intent = new Intent(mContext, VideoPlayer.class);
                     intent.putExtra("uri", uri);
                     mContext.startActivity(intent);
-
-                    Log.e("ERROR", "IM HERE2");
                 }
             }
         });

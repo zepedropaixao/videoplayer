@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.paixao.videoplayer.R;
+import me.paixao.videoplayer.db.models.Playlist;
+import me.paixao.videoplayer.db.models.Playlist_Table;
 import me.paixao.videoplayer.db.models.Video;
 import me.paixao.videoplayer.db.models.Video_Table;
 import me.paixao.videoplayer.ui.customviews.VideoControllerView;
@@ -76,7 +78,16 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
 
         currentVideoSource = videoPlace;
 
-        setTitle(getFileName(videoPlace));
+        Playlist pl = null;
+        if (playlist_uuid != null)
+            pl = new Select().from(Playlist.class)
+                    .where(Playlist_Table.uuid.eq(playlist_uuid))
+                    .querySingle();
+        if (pl != null) {
+            setTitle("#" + pl.getName() + " - " + getFileName(videoPlace));
+        } else {
+            setTitle(getFileName(videoPlace));
+        }
 
         super.onCreate(savedInstanceState);
     }

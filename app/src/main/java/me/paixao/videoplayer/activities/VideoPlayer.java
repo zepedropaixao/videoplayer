@@ -18,14 +18,19 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.raizlabs.android.dbflow.sql.language.Select;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import me.paixao.videoplayer.R;
+import me.paixao.videoplayer.db.models.Video;
+import me.paixao.videoplayer.db.models.Video_Table;
 import me.paixao.videoplayer.ui.customviews.VideoControllerView;
 
 public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback, MediaPlayer.OnPreparedListener, VideoControllerView.MediaPlayerControl {
-
+    String playlist_uuid;
     String currentVideoSource;
     SurfaceView videoSurface;
     MediaPlayer player;
@@ -58,8 +63,13 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
         }
 
         String videoPlace = null;
+        playlist_uuid = null;
         if (getIntent().hasExtra("uri"))
             videoPlace = getIntent().getStringExtra("uri");
+
+        if (getIntent().hasExtra("playlist"))
+            playlist_uuid = getIntent().getStringExtra("playlist");
+
 
         if (videoPlace == null)
             finish();
@@ -67,6 +77,7 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
         currentVideoSource = videoPlace;
 
         setTitle(getFileName(videoPlace));
+
         super.onCreate(savedInstanceState);
     }
 
@@ -85,6 +96,12 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.setDataSource(this, Uri.parse(videoPlace));
             player.setOnPreparedListener(this);
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    goToNextVideo();
+                }
+            });
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
@@ -96,9 +113,62 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
         }
     }
 
+    public void goToPreviousVideo() {
+        // PREVIOUS
+        if (myCurrentVideoIndex == 0) {
+            myCurrentVideoIndex = allMedia.size() - 1;
+        } else {
+            myCurrentVideoIndex--;
+        }
+        String uri = allMedia.get(myCurrentVideoIndex);
+        Intent intent = new Intent(_this, VideoPlayer.class);
+        intent.putExtra("uri", uri);
+        if (playlist_uuid != null)
+            intent.putExtra("playlist", playlist_uuid);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+    }
+
+    public void goToNextVideo() {
+        // NEXT
+        if (myCurrentVideoIndex == allMedia.size() - 1) {
+            myCurrentVideoIndex = 0;
+        } else {
+            myCurrentVideoIndex++;
+        }
+        String uri = allMedia.get(myCurrentVideoIndex);
+        Intent intent = new Intent(_this, VideoPlayer.class);
+        intent.putExtra("uri", uri);
+        if (playlist_uuid != null)
+            intent.putExtra("playlist", playlist_uuid);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+    }
+
+    public ArrayList<String> getAllPlaylistMedia() {
+        if (playlist_uuid != null) {
+            List<Video> videoList = new Select().from(Video.class)
+                    .where(Video_Table.playlist.eq(playlist_uuid))
+                    .orderBy(Video_Table.order, true)
+                    .queryList();
+            ArrayList<String> output = new ArrayList<>();
+            for (Video vid : videoList)
+                output.add(vid.getUri());
+            return output;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public void refresh() {
-        allMedia = getAllMedia();
+        if (playlist_uuid == null) {
+            allMedia = getAllMedia();
+        } else {
+            allMedia = getAllPlaylistMedia();
+        }
         for (String media : allMedia) {
             if (media.equals(currentVideoSource))
                 break;
@@ -109,34 +179,12 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
         controller.setPrevNextListeners(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // NEXT
-                if (myCurrentVideoIndex == allMedia.size() - 1) {
-                    myCurrentVideoIndex = 0;
-                } else {
-                    myCurrentVideoIndex++;
-                }
-                String uri = allMedia.get(myCurrentVideoIndex);
-                Intent intent = new Intent(_this, VideoPlayer.class);
-                intent.putExtra("uri", uri);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+                goToNextVideo();
             }
         }, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // PREVIOUS
-                if (myCurrentVideoIndex == 0) {
-                    myCurrentVideoIndex = allMedia.size() - 1;
-                } else {
-                    myCurrentVideoIndex--;
-                }
-                String uri = allMedia.get(myCurrentVideoIndex);
-                Intent intent = new Intent(_this, VideoPlayer.class);
-                intent.putExtra("uri", uri);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+                goToPreviousVideo();
             }
         });
 

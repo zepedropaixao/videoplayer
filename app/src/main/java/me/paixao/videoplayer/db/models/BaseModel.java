@@ -85,6 +85,7 @@ public abstract class BaseModel implements Model {
     @SuppressWarnings("unchecked")
     @Override
     public boolean save() {
+        getUuid();
         FlowManager.getDatabase(VPDatabase.class)
                 .beginTransactionAsync(FastStoreModelTransaction
                         .saveBuilder(getModelAdapter())

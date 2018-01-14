@@ -4,6 +4,8 @@
     <string name="drawer_close">VideoPlayer</string>
     <string name="create_new_playlist">Create new playlist</string>
     <string name="please_select_the_videos_you_wish">Please select the videos you wish to add to your playlist</string>
+    <string name="please_select_or_deselect">Please select or de-select videos to change playlist</string>
+
     <string name="main_activity_title">Pedro\'s Video Player</string>
     <string name="your_saved_playlists">Your saved playlists</string>
     <string name="please_select_videos">Please select videos</string>
@@ -11,4 +13,5 @@
         <item quantity="one">%d video selected</item>
         <item quantity="other">%d videos selected</item>
     </plurals>
+    <string name="success_delete_playlist">Playlist deleted successfully</string>
 </resources>

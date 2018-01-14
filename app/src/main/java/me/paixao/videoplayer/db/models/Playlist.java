@@ -45,4 +45,11 @@ public class Playlist extends BaseModel {
                 .orderBy(Video_Table.order, true)
                 .queryList();
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean delete() {
+        Video.deleteAll(getVideos());
+        return super.delete();
+    }
 }

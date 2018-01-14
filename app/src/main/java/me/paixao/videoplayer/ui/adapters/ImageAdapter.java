@@ -111,6 +111,17 @@ public class ImageAdapter extends BaseAdapter {
         handler.post(r);
     }
 
+    public void reset(ArrayList<String> selected) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        mSelectedList = selected;
+        final Runnable r = new Runnable() {
+            public void run() {
+                notifyDataSetChanged();
+            }
+        };
+        handler.post(r);
+    }
+
     @Override
     public int getCount() {
         return mList.size();

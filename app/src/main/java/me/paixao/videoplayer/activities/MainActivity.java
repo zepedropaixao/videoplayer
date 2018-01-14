@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -53,12 +53,6 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(this);
 
-        if (imageAdapter == null) {
-            imageAdapter = new ImageAdapter(MainActivity.this, getAllMedia(), new ArrayList<String>());
-
-            final GridView grid = findViewById(R.id.gridview);
-            grid.setAdapter(imageAdapter);
-        }
 
         final BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
@@ -82,6 +76,20 @@ public class MainActivity extends BaseActivity
                         return true;
                     }
                 });
+
+        super.onCreate(savedInstanceState);
+
+
+    }
+
+    @Override
+    public void refresh() {
+        if (imageAdapter == null) {
+            imageAdapter = new ImageAdapter(MainActivity.this, getAllMedia(), new ArrayList<String>());
+
+            final GridView grid = findViewById(R.id.gridview);
+            grid.setAdapter(imageAdapter);
+        }
     }
 
     /* Called whenever we call invalidateOptionsMenu() */
@@ -91,25 +99,6 @@ public class MainActivity extends BaseActivity
         //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
         //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public void refresh() {
-
-
-        /*final ListView videoList = findViewById(R.id.video_list);
-
-        videoList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getAllMedia()));
-        videoList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String uri = (String) videoList.getAdapter().getItem(position);
-                Intent intent = new Intent(_this, VideoPlayer.class);
-                intent.putExtra("uri", uri);
-                startActivity(intent);
-            }
-        });*/
-
     }
 
     @Override

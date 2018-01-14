@@ -47,9 +47,7 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player_2);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -66,56 +64,10 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
         if (videoPlace == null)
             finish();
 
+        currentVideoSource = videoPlace;
+
         setTitle(getFileName(videoPlace));
-
-        allMedia = getAllMedia();
-        for (String media : allMedia) {
-            if (media.equals(videoPlace))
-                break;
-            myCurrentVideoIndex++;
-        }
-
-        controller = new VideoControllerView(this);
-        controller.setPrevNextListeners(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // NEXT
-                if (myCurrentVideoIndex == 0) {
-                    myCurrentVideoIndex = allMedia.size() - 1;
-                } else {
-                    myCurrentVideoIndex--;
-                }
-                String uri = allMedia.get(myCurrentVideoIndex);
-                Intent intent = new Intent(_this, VideoPlayer.class);
-                intent.putExtra("uri", uri);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-            }
-        }, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // PREVIOUS
-                if (myCurrentVideoIndex == allMedia.size() - 1) {
-                    myCurrentVideoIndex = 0;
-                } else {
-                    myCurrentVideoIndex++;
-                }
-                String uri = allMedia.get(myCurrentVideoIndex);
-                Intent intent = new Intent(_this, VideoPlayer.class);
-                intent.putExtra("uri", uri);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
-            }
-        });
-
-        videoSurface = (SurfaceView) findViewById(R.id.videoSurface);
-        SurfaceHolder videoHolder = videoSurface.getHolder();
-        videoHolder.addCallback(this);
-
-        if (player == null)
-            createPlayer(videoPlace);
+        super.onCreate(savedInstanceState);
     }
 
     public void createPlayer(String videoPlace) {
@@ -146,6 +98,54 @@ public class VideoPlayer extends BaseActivity implements SurfaceHolder.Callback,
 
     @Override
     public void refresh() {
+        allMedia = getAllMedia();
+        for (String media : allMedia) {
+            if (media.equals(currentVideoSource))
+                break;
+            myCurrentVideoIndex++;
+        }
+
+        controller = new VideoControllerView(this);
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // NEXT
+                if (myCurrentVideoIndex == allMedia.size() - 1) {
+                    myCurrentVideoIndex = 0;
+                } else {
+                    myCurrentVideoIndex++;
+                }
+                String uri = allMedia.get(myCurrentVideoIndex);
+                Intent intent = new Intent(_this, VideoPlayer.class);
+                intent.putExtra("uri", uri);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // PREVIOUS
+                if (myCurrentVideoIndex == 0) {
+                    myCurrentVideoIndex = allMedia.size() - 1;
+                } else {
+                    myCurrentVideoIndex--;
+                }
+                String uri = allMedia.get(myCurrentVideoIndex);
+                Intent intent = new Intent(_this, VideoPlayer.class);
+                intent.putExtra("uri", uri);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+            }
+        });
+
+        videoSurface = (SurfaceView) findViewById(R.id.videoSurface);
+        SurfaceHolder videoHolder = videoSurface.getHolder();
+        videoHolder.addCallback(this);
+
+        if (player == null)
+            createPlayer(currentVideoSource);
     }
 
     @Override

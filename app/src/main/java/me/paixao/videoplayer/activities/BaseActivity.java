@@ -32,6 +32,8 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         if (!checkPermissions()) {
             requestPermissions();
+        } else {
+            refresh();
         }
     }
 
@@ -44,7 +46,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        refresh();
     }
 
     public void refresh() {
